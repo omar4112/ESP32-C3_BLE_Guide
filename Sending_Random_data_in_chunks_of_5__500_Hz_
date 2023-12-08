@@ -1,0 +1,88 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+#include <BLE2902.h>
+
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID_TX "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+BLECharacteristic* pCharacteristic;
+bool deviceConnected = false;
+int txValues[5]; // Change array size to 5
+
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      deviceConnected = true;
+    }
+
+    void onDisconnect(BLEServer* pServer) {
+      deviceConnected = false;
+    }
+};
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Starting BLE work!");
+
+  // Create the BLE Device
+  BLEDevice::init("ESP32");
+
+  // Create BLE server
+  BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+
+  // Create BLE service
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+
+  // Create a BLE Characteristic
+  pCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID_TX,
+    BLECharacteristic::PROPERTY_NOTIFY
+  );
+
+  // Add the Client Characteristic Configuration descriptor
+  BLE2902* p2902 = new BLE2902();
+  pCharacteristic->addDescriptor(p2902);
+
+  // Start the service
+  pService->start();
+
+  // Start advertising
+  pServer->getAdvertising()->start();
+  Serial.println("Waiting for a client connection to notify...");
+}
+
+void loop() {
+  if (deviceConnected) {
+    // Adjust the loop delay to achieve the desired frequency (between 200Hz and 500Hz)
+    unsigned long loopStartTime = micros(); // Record the start time of the loop
+
+    for (int i = 0; i < 5; i++) {
+      // Generate 5 random values between -10 and 20
+      txValues[i] = random(-10, 20);
+    }
+
+    // Convert the 5 values to strings
+    String txData = "";
+    for (int i = 0; i < 5; i++) {
+      txData += String(txValues[i]);
+      if (i < 4) {
+        txData += ","; // Separate values with a comma
+      }
+    }
+
+    // Set the characteristic value
+    pCharacteristic->setValue(txData.c_str()); // Convert the String to a C-style string
+    pCharacteristic->notify();
+    Serial.println("Sent random data: " + txData);
+
+    // Calculate the time elapsed in the loop and introduce a delay to achieve the desired frequency
+    unsigned long loopEndTime = micros();
+    unsigned long loopDuration = loopEndTime - loopStartTime;
+    unsigned long desiredLoopDuration = 1000000 / 500; // 500Hz
+
+    if (loopDuration < desiredLoopDuration) {
+      delayMicroseconds(desiredLoopDuration - loopDuration);
+    }
+  }
+}
