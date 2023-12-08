@@ -1,0 +1,75 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+#include <BLE2902.h>
+
+#define SERVICE_UUID            "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID_TX  "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+BLECharacteristic* pCharacteristic;
+bool deviceConnected = false;
+float frequency = 1.0; // Frequency of the sine wave in Hz
+unsigned long timeElapsed = 0;
+
+class MyServerCallbacks: public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+        deviceConnected = true;
+    }
+
+    void onDisconnect(BLEServer* pServer) {
+        deviceConnected = false;
+    }
+};
+
+void setup() {
+    Serial.begin(115200);
+    Serial.println("Starting BLE work!");
+
+    // Create the BLE Device
+    BLEDevice::init("ESP32");
+
+    // Create BLE server
+    BLEServer *pServer = BLEDevice::createServer();
+    pServer->setCallbacks(new MyServerCallbacks());
+
+    // Create BLE service
+    BLEService *pService = pServer->createService(SERVICE_UUID);
+
+    // Create a BLE Characteristic
+    pCharacteristic = pService->createCharacteristic(
+        CHARACTERISTIC_UUID_TX,
+        BLECharacteristic::PROPERTY_NOTIFY
+    );
+
+    // Add the Client Characteristic Configuration descriptor
+    BLE2902* p2902 = new BLE2902();
+    pCharacteristic->addDescriptor(p2902);
+
+    // Start the service
+    pService->start();
+
+    // Start advertising
+    pServer->getAdvertising()->start();
+    Serial.println("Waiting for a client connection to notify...");
+}
+
+void loop() {
+    if (deviceConnected) {
+        unsigned long currentTime = millis();
+
+        if (currentTime - timeElapsed >= 1000 / frequency) {
+            timeElapsed = currentTime;
+
+            float amplitude = 10.0; // Amplitude of the sine wave
+            float offset = 0.0;    // Offset of the sine wave
+
+            // Generate the sine wave values
+            for (int i = 0; i < 100; i++) {
+                float value = amplitude * sin(2 * M_PI * frequency * i / 100) + offset;
+                pCharacteristic->setValue(String(value).c_str());
+                pCharacteristic->notify();
+                delay(10); // Adjusted delay to control the transmission rate (1000ms/500Hz = 2ms)
+            }
+        }
+    }
+}
