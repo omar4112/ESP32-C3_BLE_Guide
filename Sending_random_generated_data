@@ -1,0 +1,71 @@
+#include <BLEDevice.h>
+#include <BLEUtils.h>
+#include <BLEServer.h>
+#include <BLE2902.h>
+
+//defining the UUIDs for the BLE service and characteristic, UUID's are unique identifiers
+#define SERVICE_UUID        "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
+#define CHARACTERISTIC_UUID_TX "beb5483e-36e1-4688-b7f5-ea07361b26a8"
+
+BLECharacteristic* pCharacteristic;//A pointer to the BLECharacteristic
+bool deviceConnected = false; //A boolean flag that keeps track of whether a central device is connected.
+int txValue = 0;//An integer variable used to store the data to be sent.
+
+class MyServerCallbacks: public BLEServerCallbacks { //user-defined class that inherits from BLEServerCallbacks
+    void onConnect(BLEServer* pServer) {  //Called when a central device connects to your ESP32.
+      deviceConnected = true;
+    }
+
+    void onDisconnect(BLEServer* pServer) {  //Called when a central device disconnects.
+      deviceConnected = false;
+    }
+};
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Starting BLE work!");
+
+  // Create the BLE Device
+  BLEDevice::init("ESP32");
+
+  // Create BLE server
+  BLEServer *pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks()); //set callback functions that handle connection and disconnection events.
+
+  // Create BLE service
+  BLEService *pService = pServer->createService(SERVICE_UUID);
+
+  // Create a BLE Characteristic
+  pCharacteristic = pService->createCharacteristic(
+    CHARACTERISTIC_UUID_TX,
+    BLECharacteristic::PROPERTY_NOTIFY  //indicate that it can be used to send notifications to connected central devices.
+  );
+
+  // Add the Client Characteristic Configuration descriptor
+  BLE2902* p2902 = new BLE2902();  //BLE2902 represent the "Client Characteristic Configuration" descriptor
+  pCharacteristic->addDescriptor(p2902);
+
+  // Start the service
+  pService->start();
+
+  // Start advertising
+  pServer->getAdvertising()->start();
+  Serial.println("Waiting for a client connection to notify...");
+}
+
+void loop() {
+  if (deviceConnected) {
+    txValue = random(-10, 20);
+
+    // Conversion of txValue
+    char txString[8];
+    dtostrf(txValue, 1, 2, txString); // 1:minimum width of the output string.2: Number of decimal places in the output string
+
+    // Set the characteristic value
+    pCharacteristic->setValue(txString);
+    pCharacteristic->notify();
+    Serial.println("Sent random data: " + String(txString));
+  }
+
+  delay(100); // Delay for 2 seconds before sending the next data
+}
