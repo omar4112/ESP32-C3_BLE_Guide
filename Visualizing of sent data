@@ -1,34 +1,36 @@
-import asyncio
-from bleak import BleakClient
-import matplotlib.pyplot as plt
+import asyncio  # Import asyncio library for asynchronous I/O
+from bleak import BleakClient  # Import BleakClient for Bluetooth communication
+import matplotlib.pyplot as plt  # Import matplotlib for data visualization
 
 
 # Define your ESP32's Bluetooth address
 esp32_address = "34:B4:72:EA:77:1E"  # Replace with your ESP32's address
 
 
-data_x = []
-data_y = []
+data_x = []  # Create an empty list to store x-axis data (time)
+data_y = []  # Create an empty list to store y-axis data (received values)
 
 
 async def run(address):
+    # Establish a connection to the ESP32 via BLE
     async with BleakClient(address) as client:
-        x = 0
-        while True:
+        x = 0  # Initialize a variable for x-axis data
+        while True:  # Continuously loop to receive data
+            # Read a value from a specific GATT characteristic on the ESP32
             value = await client.read_gatt_char("beb5483e-36e1-4688-b7f5-ea07361b26a8")
-            received = float(value.decode())  # Assuming float values are being sent
-            data_y.append(received)
-            data_x.append(x)
-            x += 1
+            received = float(value.decode())  # Decode and convert received data to a float
+            data_y.append(received)  # Append received value to the y-axis data list
+            data_x.append(x)  # Append current x-axis data point
+            x += 1  # Increment x-axis value for the next data point
+
+            # Plot the received data in real-time
+            plt.plot(data_x, data_y)  # Plot x and y data points
+            plt.xlabel('Time')  # Label x-axis as 'Time'
+            plt.ylabel('Received Value')  # Label y-axis as 'Received Value'
+            plt.title('Received Data from ESP32')  # Set the plot title
+            plt.draw()  # Update the plot
+            plt.pause(0.0001)  # Pause to display the plot
 
 
-            plt.plot(data_x, data_y)
-            plt.xlabel('Time')
-            plt.ylabel('Received Value')
-            plt.title('Received Data from ESP32')
-            plt.draw()
-            plt.pause(0.0001)
-
-
-loop = asyncio.get_event_loop()
-loop.run_until_complete(run(esp32_address))
+loop = asyncio.get_event_loop()  # Get the event loop
+loop.run_until_complete(run(esp32_address))  # Run the asynchronous task to communicate with ESP32
