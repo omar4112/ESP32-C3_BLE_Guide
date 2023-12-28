@@ -1,7 +1,7 @@
 import asyncio  # Import asyncio library for asynchronous I/O
 from bleak import BleakClient  # Import BleakClient for Bluetooth communication
 import matplotlib.pyplot as plt  # Import matplotlib for data visualization
-
+ 
 
 # Define your ESP32's Bluetooth address
 esp32_address = "34:B4:72:EA:77:1E"  # Replace with your ESP32's address
