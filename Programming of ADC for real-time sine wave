@@ -3,56 +3,62 @@
 #include <BLEServer.h>
 #include <BLE2902.h>
 
+// Declare a BLE characteristic to handle data transmission
 BLECharacteristic* pCharacteristic;
+
+// Flag to track device connection status
 bool deviceConnected = false;
 
+// Define UUIDs for the BLE service and characteristic
 #define SERVICE_UUID            "4fafc201-1fb5-459e-8fcc-c5c9c331914b"
 #define CHARACTERISTIC_UUID_TX  "beb5483e-36e1-4688-b7f5-ea07361b26a8"
 
+// Define the analog input pin number
 const int analogInputPin = 1; 
 
+// Define a custom class to handle BLE server callbacks
 class MyServerCallbacks : public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
-        deviceConnected = true;
+        deviceConnected = true; // Set connection status flag to true when a client connects
     }
 
     void onDisconnect(BLEServer* pServer) {
-        deviceConnected = false;
+        deviceConnected = false; // Set connection status flag to false when a client disconnects
     }
 };
 
 void setup() {
-    Serial.begin(115200);
-    Serial.println("Starting BLE work!");
+    Serial.begin(115200); // Initialize serial communication at 115200 bits per second
+    Serial.println("Starting BLE work!"); // Print a message to indicate the start of BLE setup
 
-    BLEDevice::init("ESP32");
+    BLEDevice::init("ESP32"); // Initialize the ESP32 as a BLE device
 
-    BLEServer *pServer = BLEDevice::createServer();
-    pServer->setCallbacks(new MyServerCallbacks());
+    BLEServer *pServer = BLEDevice::createServer(); // Create a BLE server
+    pServer->setCallbacks(new MyServerCallbacks()); // Set server callbacks for handling connections
 
-    BLEService *pService = pServer->createService(SERVICE_UUID);
-
+    BLEService *pService = pServer->createService(SERVICE_UUID); // Create a BLE service
+    // Create a characteristic for the service with notify property
     pCharacteristic = pService->createCharacteristic(
         CHARACTERISTIC_UUID_TX,
         BLECharacteristic::PROPERTY_NOTIFY
     );
 
-    BLE2902* p2902 = new BLE2902();
-    pCharacteristic->addDescriptor(p2902);
+    BLE2902* p2902 = new BLE2902(); // Create a BLE descriptor
+    pCharacteristic->addDescriptor(p2902); // Add the descriptor to the characteristic
 
-    pService->start();
+    pService->start(); // Start the BLE service
 
-    pServer->getAdvertising()->start();
-    Serial.println("Waiting for a client connection to notify...");
+    pServer->getAdvertising()->start(); // Start BLE advertising
+    Serial.println("Waiting for a client connection to notify..."); // Print a message to indicate waiting for connection
 }
 
 void loop() {
-    if (deviceConnected) {
-        int analogValue = analogRead(analogInputPin); // Read analog value from function generator
-        Serial.println(analogValue);
-
-        pCharacteristic->setValue(String(analogValue).c_str());
-        pCharacteristic->notify();
+    if (deviceConnected) { // Check if a client is connected
+        int analogValue = analogRead(analogInputPin); // Read analog value from the specified pin
+        Serial.println(analogValue); // Print the analog value read
+        
+        pCharacteristic->setValue(String(analogValue).c_str()); // Set the characteristic value with the analog value
+        pCharacteristic->notify(); // Notify the connected device about the updated value
         delay(100); // Adjust delay for the desired sampling rate
     }
 }
