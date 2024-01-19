@@ -1,10 +1,14 @@
-#This Arduino code configures an ESP32 microcontroller as a Bluetooth Low Energy (BLE) server. 
-#It initializes the BLE device, creates a server with a custom callback class to track client connections,
-#and defines a service with a notify-enabled characteristic.
-#The characteristic is associated with an analog sensor input pin, and the server continuously checks for client connections in the loop.
-#When a client is connected, it reads analog sensor data, updates the characteristic value, and notifies the connected client.
-#The code serves as a simple BLE-based communication platform, allowing a BLE client to receive real-time analog sensor data from the ESP32 device.
+/* 
+This Arduino code configures an ESP32 microcontroller as a Bluetooth Low Energy (BLE) server. 
 
+It initializes the BLE device, creates a server with a custom callback class to track client connections, and defines a service with a notify-enabled characteristic.
+
+The characteristic is associated with an analog sensor input pin, and the server continuously checks for client connections in the loop.
+
+When a client is connected, it reads analog sensor data, updates the characteristic value, and notifies the connected client.
+
+The code serves as a simple BLE-based communication platform, allowing a BLE client to receive real-time analog sensor data from the ESP32 device.
+*/
 
 
 #include <BLEDevice.h>
