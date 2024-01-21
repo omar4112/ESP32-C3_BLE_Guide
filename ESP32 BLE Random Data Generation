@@ -1,3 +1,11 @@
+/* 
+
+This code Sets up a Buletooth Low Energy (BLE) server on ESP32 device. It creats a BLE service and 
+characteristics to send random numerical data to a connected client device.
+
+*/
+
+
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
