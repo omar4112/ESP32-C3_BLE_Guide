@@ -1,8 +1,13 @@
-#This revised code remains a BLE server setup on an ESP32, with a connection to a client triggering the transmission of analog sensor data.
-#The code initializes the BLE device, sets up a server with callbacks to track connections, and defines a service with a characteristic configured for notifications.
-#The main alteration is the use of a potentiometer as the analog sensor, which is read at GPIO pin 1.
-#The sensor's data is then sent to the connected BLE client in real-time. The title suggestion for this code could be "ESP32 BLE Potentiometer Data Transmission."
+/*
 
+This revised code remains a BLE server setup on an ESP32, with a connection to a client triggering the transmission of analog sensor data.
+
+The code initializes the BLE device, sets up a server with callbacks to track connections, and defines a service with a characteristic configured for notifications.
+
+The main alteration is the use of a potentiometer as the analog sensor, which is read at GPIO pin 1.
+
+The sensor's data is then sent to the connected BLE client in real-time. The title suggestion for this code could be "ESP32 BLE Potentiometer Data Transmission."
+*/
 
 
 #include <BLEDevice.h>
