@@ -68,7 +68,7 @@ void loop() {
                 float value = amplitude * sin(2 * M_PI * frequency * i / 100) + offset;
                 pCharacteristic->setValue(String(value).c_str());
                 pCharacteristic->notify();
-                delay(10); // Adjusted delay to control the transmission rate (1000ms/500Hz = 2ms)
+                delay(2); // Adjusted delay to control the transmission rate (1000ms/500Hz = 2ms)
             }
         }
     }
