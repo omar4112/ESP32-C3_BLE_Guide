@@ -7,7 +7,6 @@
 %demonstrating the transmission of dynamically generated data. Adjustments to the loop delay allow users to control the data streaming frequency.
 
 
-
 #include <BLEDevice.h>
 #include <BLEUtils.h>
 #include <BLEServer.h>
