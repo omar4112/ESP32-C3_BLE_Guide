@@ -1,10 +1,15 @@
-%This Arduino code transforms an ESP32 microcontroller into a Bluetooth Low Energy (BLE) server capable of streaming random data to a connected BLE client.
-%The ESP32 initializes as a BLE device, creates a server with callbacks to monitor client connections,
-%and establishes a service with a characteristic configured for notifications. In the main loop, when a client is connected,
-%the code generates an array of five random values between -10 and 20, converts them into a comma-separated string,
-%and transmits the data to the client at a frequency between 200Hz and 500Hz. 
-%This "ESP32 BLE Random Data Streamer" offers a versatile example for wireless communication between an ESP32 and a BLE-enabled device,
-%demonstrating the transmission of dynamically generated data. Adjustments to the loop delay allow users to control the data streaming frequency.
+/*
+This Arduino code transforms an ESP32 microcontroller into a Bluetooth Low Energy (BLE) server capable of streaming random data to a connected BLE client.
+
+The ESP32 initializes as a BLE device, creates a server with callbacks to monitor client connections,
+and establishes a service with a characteristic configured for notifications. In the main loop, when a client is connected,
+the code generates an array of five random values between -10 and 20, converts them into a comma-separated string,
+and transmits the data to the client at a frequency between 200Hz and 500Hz. 
+
+This "ESP32 BLE Random Data Streamer" offers a versatile example for wireless communication between an ESP32 and a BLE-enabled device,
+demonstrating the transmission of dynamically generated data. Adjustments to the loop delay allow users to control the data streaming frequency.
+
+*/
 
 
 #include <BLEDevice.h>
