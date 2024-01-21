@@ -67,5 +67,5 @@ void loop() {
     Serial.println("Sent random data: " + String(txString));
   }
 
-  delay(100); // Delay for 2 seconds before sending the next data
+  delay(2); // Delay for 2 seconds before sending the next data
 }
